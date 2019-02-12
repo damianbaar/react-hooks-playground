@@ -1,22 +1,34 @@
 import React from 'react'
-import { List } from 'antd'
+import { List, Card } from 'antd'
+import { logos } from './Logos'
 
-const renderItem = (item: { url: string }) => (
-  <List.Item style={{ width: "200px" }}>
-    <img
-      style={{ width: "100%", height: "100px" }}
-      src={item.url}
-    />
+const renderItem = (item: any) => (
+  <List.Item>
+    <Card
+      hoverable={true}
+      bodyStyle={{
+        width: "100%",
+        height: "100%",
+        padding: 0
+      }}
+    >
+      <img
+        style={{
+          width: "100%",
+          height: "100%"
+        }}
+        src={item}
+      />
+    </Card>
   </List.Item>
 )
 
 export function AddLogo() {
   return <div>
-    <h1>Add background</h1>
+    <h2>Add logo</h2>
     <List
-      bordered={true}
-      itemLayout="horizontal"
-      dataSource={[]}
+      grid={{ column: 3, gap: 0 }}
+      dataSource={logos}
       renderItem={renderItem}
     />
   </div>

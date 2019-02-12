@@ -1,10 +1,10 @@
-import React, { useMemo, useState, createContext, Dispatch, SetStateAction, useCallback } from 'react'
-import { Input, List, Button, Card } from 'antd'
+import React, { useMemo, useState, createContext, Dispatch, SetStateAction, useCallback, useContext } from 'react'
+import { Input, List, Button, Card, Divider } from 'antd'
 import { range } from 'ramda'
 import { usePromise } from 'react-hook-utils'
 import { useDebounce } from 'use-debounce'
 import pReduce from 'p-reduce'
-
+import { EditorContext, mkSetBackgroundAction } from 'src/Actions';
 interface IBackgroundItem {
   url: string
 }
@@ -27,13 +27,17 @@ const renderItem = (item: IBackgroundItem) => (
         hoverable={true}
         style={{
           width: "100%",
-          height: "200px",
+          height: "150px",
           overflow: "hidden",
           border: item.url === value.selectedItem ? '2px solid #000' : ''
         }}
         cover={
           <img
-            style={{ width: "100%", maxWidth: "100%" }}
+            style={{
+              width: "100%",
+              height: "150px",
+              objectFit: 'cover'
+            }}
             src={item.url}
           />
         }
@@ -41,19 +45,15 @@ const renderItem = (item: IBackgroundItem) => (
   }</BackgroundSelectCtx.Consumer>
 )
 
-interface IProps {
-  onBackgroundSelect: (val: IBackgroundPayload) => void
-  selectedBackground: string
-}
-
-export function UnsplashList({ onBackgroundSelect }: Partial<IProps>) {
+export function UnsplashList() {
   const [phrase, setPhrase] = useState('')
   const [selectedItem, setSelectedItem] = useState('')
+  const { dispatch } = useContext(EditorContext)
   const debouncedPhrase = useDebounce(phrase, 1000)
   const updateSelectedBackground = useCallback(
-    (e) => {
-      setSelectedItem(e)
-      if (onBackgroundSelect) { onBackgroundSelect(e) }
+    (backgroundURL) => {
+      setSelectedItem(backgroundURL)
+      dispatch(mkSetBackgroundAction(backgroundURL))
     },
     [selectedItem]
   )
@@ -62,7 +62,7 @@ export function UnsplashList({ onBackgroundSelect }: Partial<IProps>) {
       useMemo(() =>
         fetchMovies(debouncedPhrase), [debouncedPhrase]))
 
-  return <div style={{ minHeight: '200px' }}>
+  return <div>
     <h1>Select background</h1>
     <h1>{error ? error.toString() : ''}</h1>
     <Input
@@ -79,12 +79,16 @@ export function UnsplashList({ onBackgroundSelect }: Partial<IProps>) {
         renderItem={renderItem}
       />
     </BackgroundSelectCtx.Provider>
-    <Button
-      disabled={!selectedItem}
-      onClick={() => updateSelectedBackground('')}
-    >
-      Delete background
+    <Divider />
+    <div style={{ textAlign: "center" }}>
+      <Button
+        disabled={!selectedItem}
+        type="danger"
+        onClick={() => updateSelectedBackground('')}
+      >
+        Delete background
     </Button>
+    </div>
   </div>
 }
 

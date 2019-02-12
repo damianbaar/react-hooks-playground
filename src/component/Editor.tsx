@@ -1,14 +1,13 @@
-import React, { createContext, useRef, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
 import { IAddTextPayload } from './AddText'
+import { EditorContext } from '../Actions'
 import { Rnd } from 'react-rnd'
 
-// editor context
 export interface IDrawable {
   selectedBackground: string
   texts: IAddTextPayload[]
 }
 
-export const EditorContext = createContext<{ elements: IDrawable }>({ elements: {} as IDrawable })
 export const Editor = () => {
   const [size, setSize] = useState({ width: 0, height: 0 })
   const containerEl = useRef<HTMLDivElement>(null)
@@ -31,7 +30,7 @@ export const Editor = () => {
   })
 
   return <EditorContext.Consumer>{
-    ({ elements }) =>
+    ({ state: { elements } }) =>
       <div>
         <h1>Editor</h1>
         <div
@@ -64,7 +63,9 @@ export const Editor = () => {
                 style={{
                   width: '100%',
                   height: '100%',
-                  fontFamily: t.font,
+                  fontFamily: t.textStyles.font,
+                  fontSize: t.textStyles.size,
+                  color: t.textStyles.color,
                 }}
               >{t.text}</p>
             </Rnd>
