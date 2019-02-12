@@ -17,6 +17,15 @@
     ],
     "object-literal-sort-keys": [
       false
+    ],
+    "no-debugger": [
+      false
+    ],
+    "no-console": [
+      false
+    ],
+    "jsx-no-lambda": [
+      false
     ]
   }
 }
