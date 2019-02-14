@@ -1,15 +1,16 @@
-### React hooks playground
+### Simple editor
 
-Based on `create-react-app` with `typescript` enabled and fresh `react-hooks`.
+Simple editor app with a few features.
 
 #### How it looks like
 * [Static page](https://damianbaar.github.io/react-hooks-playground/)
-* [Demo movie]()
+* [Demo movie](https://github.com/damianbaar/react-hooks-playground/blob/master/demo/promo-demo.mp4)
 
 #### What is inside
-* `react-hooks` usage
+* plenty of `react-hooks` in action
 * `react-dnd` for drag and drop functionality
 * `react-rnd` for resizing stuff
+* `monocle-ts` lenses
 * very naive `unsplash` integration
 
 #### How to develop
