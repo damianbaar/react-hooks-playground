@@ -1,0 +1,13 @@
+[ver:1,total:5700]
+src/component/Editor.tsx:1874,1550152800:40,1550156400:1063,1550160000:771,m
+src/App.tsx:1627,1550152800:180,1550156400:698,1550160000:749,m
+src/Actions.ts:789,1550156400:124,1550160000:665,m
+package.json:536,1550156400:510,1550160000:26,m
+README.md:460,1550152800:360,1550156400:100,m
+src/component/AddLogo.tsx:157,1550156400:17,1550160000:140,m
+src/component/AddText.tsx:121,1550156400:17,1550160000:104,m
+src/htmlToPng.ts:51,1550156400:51,r
+src/component/AddText.module.css:30,1550160000:30,r
+tslint.json:20,1550160000:20,m
+node_modules/react-hook-utils/react-hook-utils.d.ts:20,1550152800:20,r
+node_modules/react-rnd/lib/index.d.ts:15,1550160000:15,r
