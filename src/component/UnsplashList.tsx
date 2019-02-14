@@ -1,10 +1,19 @@
-import React, { useMemo, useState, createContext, Dispatch, SetStateAction, useCallback, useContext } from 'react'
+import React, {
+  useMemo,
+  useState,
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useContext
+} from 'react'
 import { Input, List, Button, Card, Divider } from 'antd'
-import { range } from 'ramda'
+import range from 'ramda/es/range'
+import pReduce from 'p-reduce'
 import { usePromise } from 'react-hook-utils'
 import { useDebounce } from 'use-debounce'
-import pReduce from 'p-reduce'
-import { EditorContext, mkSetBackgroundAction } from 'src/Actions';
+
+import { EditorContext, mkSetBackgroundAction } from '../Actions'
 interface IBackgroundItem {
   url: string
 }

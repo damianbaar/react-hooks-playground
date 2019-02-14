@@ -1,8 +1,63 @@
 import React from 'react'
 import { List, Card } from 'antd'
-import { logos } from './Logos'
+import { DragSourceMonitor, DragSource, DragSourceConnector } from 'react-dnd'
 
-const renderItem = (item: any) => (
+import { logos } from './Logos'
+import { IDraggableItem, LOGO } from './DraggableItemType'
+import { IEditorContext, EditorContext, mkAddLogoAction } from '../Actions'
+
+export interface IAddLogoPayload {
+  item: string
+}
+
+type IDraggableLogo = IAddLogoPayload & IEditorContext
+
+const draggingSource = {
+  beginDrag(props: IDraggableLogo) {
+    return {
+      item: props.item,
+    }
+  },
+
+  endDrag({ dispatch, item }: IDraggableLogo, monitor: DragSourceMonitor) {
+    const dropResult = monitor.getDropResult()
+    if (dropResult) {
+      dispatch(mkAddLogoAction({ item }))
+    }
+  },
+}
+
+const BaseLogo =
+  ({ item }: { item: any }) =>
+    <img
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
+      src={item}
+    />
+
+export const DragEnabledLogo =
+  ({ connectDragSource, ...rest }: IDraggableItem & { item: string }) => {
+    return connectDragSource(
+      <div>
+        <BaseLogo {...rest} />
+      </div>
+    )
+  }
+
+const asDraggableTarget = DragSource(
+  LOGO,
+  draggingSource,
+  (connect: DragSourceConnector, monitor: DragSourceMonitor) => ({
+    connectDragSource: connect.dragSource(),
+    isDragging: monitor.isDragging(),
+  })
+)
+
+const Logo = asDraggableTarget(DragEnabledLogo)
+
+const renderItem = (item: string) => (
   <List.Item>
     <Card
       hoverable={true}
@@ -12,13 +67,13 @@ const renderItem = (item: any) => (
         padding: 0
       }}
     >
-      <img
-        style={{
-          width: "100%",
-          height: "100%"
-        }}
-        src={item}
-      />
+      <EditorContext.Consumer>{
+        context =>
+          <Logo
+            item={item}
+            {...context}
+          />
+      }</EditorContext.Consumer>
     </Card>
   </List.Item>
 )

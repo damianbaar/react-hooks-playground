@@ -26,6 +26,9 @@
     ],
     "jsx-no-lambda": [
       false
+    ],
+    "interface-name": [
+      false
     ]
   }
 }

@@ -5,8 +5,8 @@
   justify-content: space-around;
 }
 
+/* ... yeah there are other ways to increase specificity */
 .container > *
 {
-  flex:1 1 auto;
-  margin-top: 5px;
+  margin-top: 5px !important;
 }

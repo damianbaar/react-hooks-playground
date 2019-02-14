@@ -1,14 +1,95 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
-import { IAddTextPayload } from './AddText'
-import { EditorContext } from '../Actions'
+import React, { useRef, useEffect, useLayoutEffect, useState, forwardRef, RefObject } from 'react'
+import { DropTarget, DropTargetConnector, DropTargetMonitor, DndComponentClass } from 'react-dnd'
 import { Rnd } from 'react-rnd'
+
+import { EditorContext } from '../Actions'
+import { IAddTextPayload } from './AddText'
+import { LOGO, IDraggableTarget } from './DraggableItemType'
+import { IAddLogoPayload } from './AddLogo'
+
+import styles from './Editor.module.css'
 
 export interface IDrawable {
   selectedBackground: string
   texts: IAddTextPayload[]
+  logos: IAddLogoPayload[]
 }
 
-export const Editor = () => {
+export interface IExportImagePayload {
+  nodeToExport: HTMLElement
+}
+
+const TextRender = ({ textStyles, text }: IAddTextPayload) =>
+  <Rnd
+    bounds="parent"
+    style={{ border: '1px solid #DDD' }}
+    enableUserSelectHack={true}
+  >
+    <p
+      style={{
+        width: '100%',
+        height: '100%',
+        fontFamily: textStyles.font,
+        fontSize: textStyles.size,
+        color: textStyles.color,
+      }}
+    >{text}</p>
+  </Rnd>
+
+const defaultLogoPlacement = {
+  x: 10,
+  y: 10,
+  width: 100,
+  height: 'auto'
+}
+
+const defaultLogoBoundaries = {
+  minWidth: 30,
+  minHeight: 30,
+  maxHeight: 300,
+  maxWidth: 300,
+}
+
+const LogoRender = ({ item }: IAddLogoPayload) =>
+  <Rnd
+    bounds="parent"
+    enableUserSelectHack={true}
+    default={defaultLogoPlacement}
+    lockAspectRatio={true}
+    style={{ border: '1px solid #DDD' }}
+    {...defaultLogoBoundaries}
+  >
+    <img
+      style={{ width: '100%', height: 'auto' }}
+      src={item}
+      draggable={false}
+    />
+  </Rnd>
+
+interface WithSize {
+  size: {
+    width: number
+    height: number
+  }
+}
+interface WithBackground {
+  background: string
+}
+const BackgroundRender =
+  forwardRef(({ size, background }: WithSize & WithBackground, ref: RefObject<HTMLImageElement>) =>
+    <img
+      src={background}
+      ref={ref}
+      style={{
+        width: size.width,
+        height: size.height,
+        objectFit: 'cover'
+      }} />
+  )
+
+interface WithRefForwarder { forwardedRef?: RefObject<HTMLDivElement> }
+
+const BaseEditor = ({ forwardedRef }: WithRefForwarder) => {
   const [size, setSize] = useState({ width: 0, height: 0 })
   const containerEl = useRef<HTMLDivElement>(null)
   const backgroundEl = useRef<HTMLImageElement>(null)
@@ -33,45 +114,66 @@ export const Editor = () => {
     ({ state: { elements } }) =>
       <div>
         <h1>Editor</h1>
-        <div
-          ref={containerEl}
-          style={{
-            width: '100%',
-            height: '100%',
-            minWidth: '400px',
-            minHeight: '400px',
-            border: '1px solid #DDD',
-            overflow: 'hidden'
-          }}
-        >
-          {elements.selectedBackground && <img
-            src={elements.selectedBackground}
-            ref={backgroundEl}
-            style={{
-              width: size.width,
-              height: size.height,
-              objectFit: 'cover'
-            }} />
-          }
-          {elements.texts.map((t, key) => (
-            <Rnd
-              bounds="parent"
-              enableUserSelectHack={true}
-              key={key}
-            >
-              <p
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  fontFamily: t.textStyles.font,
-                  fontSize: t.textStyles.size,
-                  color: t.textStyles.color,
-                }}
-              >{t.text}</p>
-            </Rnd>
-          ))}
+        <div ref={forwardedRef}>
+          <div
+            ref={containerEl}
+            className={styles.editor}
+          >
+            {elements.selectedBackground &&
+              <BackgroundRender
+                ref={backgroundEl}
+                size={size}
+                background={elements.selectedBackground}
+              />
+            }
+
+            {elements.texts.map((t, key) =>
+              <TextRender
+                key={key}
+                textStyles={t.textStyles}
+                text={t.text}
+              />
+            )}
+
+            {elements.logos.map((t, key) =>
+              <LogoRender
+                key={key}
+                item={t.item}
+              />
+            )}
+          </div>
         </div>
       </div>
   }
   </EditorContext.Consumer>
 }
+
+export const DropEnabledEditor = ({ connectDropTarget, forwardedRef }: IDraggableTarget & WithRefForwarder) => {
+  return connectDropTarget(
+    <div>
+      <BaseEditor forwardedRef={forwardedRef} />
+    </div>
+  )
+}
+
+export const asDropTarget = DropTarget(
+  LOGO,
+  {},
+  (connect: DropTargetConnector, monitor: DropTargetMonitor) => ({
+    connectDropTarget: connect.dropTarget(),
+    isOvers: monitor.isOver(),
+    canDrop: monitor.canDrop()
+  })
+)
+
+export const DroppableEditor: DndComponentClass<WithRefForwarder>
+  = asDropTarget(DropEnabledEditor)
+
+export const ExportableEditor =
+  forwardRef((props, ref: RefObject<HTMLDivElement>) =>
+    <DroppableEditor
+      {...props}
+      forwardedRef={ref}
+    />)
+
+export const Editor = ExportableEditor
