@@ -1,13 +1,14 @@
 import React, { useRef, useEffect, useLayoutEffect, useState, forwardRef, RefObject } from 'react'
 import { DropTarget, DropTargetConnector, DropTargetMonitor, DndComponentClass } from 'react-dnd'
-import { Rnd } from 'react-rnd'
+import { Rnd, Props as RndProps } from 'react-rnd'
 
-import { EditorContext } from '../Actions'
+import { EditorContext, mkDeleteElement } from '../Actions'
 import { IAddTextPayload } from './AddText'
 import { LOGO, IDraggableTarget } from './DraggableItemType'
 import { IAddLogoPayload } from './AddLogo'
 
 import styles from './Editor.module.css'
+import { Button } from 'antd';
 
 export interface IDrawable {
   selectedBackground: string
@@ -19,22 +20,22 @@ export interface IExportImagePayload {
   nodeToExport: HTMLElement
 }
 
-const TextRender = ({ textStyles, text }: IAddTextPayload) =>
-  <Rnd
-    bounds="parent"
-    style={{ border: '1px solid #DDD' }}
-    enableUserSelectHack={true}
-  >
-    <p
-      style={{
-        width: '100%',
-        height: '100%',
-        fontFamily: textStyles.font,
-        fontSize: textStyles.size,
-        color: textStyles.color,
-      }}
-    >{text}</p>
-  </Rnd>
+const TextRender = ({ textStyles, type, text, id }: IAddTextPayload) =>
+  <EditorContext.Consumer>{({ dispatch }) =>
+    <DraggableInteractionItem
+      onDelete={() => dispatch(mkDeleteElement({ type, id }))}
+    >
+      <p
+        style={{
+          width: '100%',
+          height: '100%',
+          fontFamily: textStyles.font,
+          fontSize: textStyles.size,
+          color: textStyles.color,
+        }}
+      >{text}</p>
+    </DraggableInteractionItem>
+  }</EditorContext.Consumer>
 
 const defaultLogoPlacement = {
   x: 10,
@@ -46,25 +47,56 @@ const defaultLogoPlacement = {
 const defaultLogoBoundaries = {
   minWidth: 30,
   minHeight: 30,
-  maxHeight: 300,
-  maxWidth: 300,
+  maxHeight: 150,
+  maxWidth: 150,
 }
 
-const LogoRender = ({ item }: IAddLogoPayload) =>
-  <Rnd
-    bounds="parent"
-    enableUserSelectHack={true}
-    default={defaultLogoPlacement}
-    lockAspectRatio={true}
-    style={{ border: '1px solid #DDD' }}
-    {...defaultLogoBoundaries}
-  >
-    <img
-      style={{ width: '100%', height: 'auto' }}
-      src={item}
-      draggable={false}
-    />
-  </Rnd>
+const DraggableInteractionItem =
+  ({ children, onDelete, ...rest }: RndProps & { onDelete: () => void }) => {
+    const [over, setMouseOver] = useState(false)
+
+    return <Rnd
+      bounds="parent"
+      enableUserSelectHack={true}
+      style={{
+        border: over ? '1px solid #DDD' : '',
+        boxSizing: 'border-box'
+      }}
+      onMouseOver={(e) => setMouseOver(true)}
+      onMouseOut={(e) => setMouseOver(false)}
+      {...rest}
+    >
+      {children}
+      <Button
+        type="danger"
+        onClick={onDelete}
+        style={{
+          width: "100%",
+          minWidth: "55px",
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          visibility: over ? 'visible' : 'hidden',
+        }}
+      >delete</Button>
+    </Rnd>
+  }
+
+const LogoRender = ({ item, type, id }: IAddLogoPayload) =>
+  <EditorContext.Consumer>{({ dispatch }) =>
+    <DraggableInteractionItem
+      onDelete={() => dispatch(mkDeleteElement({ type, id }))}
+      default={defaultLogoPlacement}
+      lockAspectRatio={true}
+      {...defaultLogoBoundaries}
+    >
+
+      <img
+        style={{ width: '100%', height: 'auto' }}
+        src={item}
+        draggable={false}
+      />
+    </DraggableInteractionItem>
+  }</EditorContext.Consumer>
 
 interface WithSize {
   size: {
@@ -127,20 +159,9 @@ const BaseEditor = ({ forwardedRef }: WithRefForwarder) => {
               />
             }
 
-            {elements.texts.map((t, key) =>
-              <TextRender
-                key={key}
-                textStyles={t.textStyles}
-                text={t.text}
-              />
-            )}
+            {elements.texts.map((t, key) => <TextRender key={key} {...t} />)}
 
-            {elements.logos.map((t, key) =>
-              <LogoRender
-                key={key}
-                item={t.item}
-              />
-            )}
+            {elements.logos.map((t, key) => <LogoRender key={key} {...t} />)}
           </div>
         </div>
       </div>

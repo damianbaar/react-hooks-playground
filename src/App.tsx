@@ -16,39 +16,54 @@ import {
   EditorContext,
   initialState,
   ADD_LOGO,
+  DELETE_ELEMENT,
+  IDeletableElementPayload,
+  appendIdToElement,
+  setTexts,
+  setLogos,
+  setBackground,
 } from './Actions'
 
 import './App.css'
 import { downloadImage } from './htmlToPng'
 
-// TODO better would be to go with lenses -> monocle-ts
+
+const deleteItem = (payload: IDeletableElementPayload) => {
+  if (payload.type === 'text')
+    return setTexts
+      .modify(t =>
+        t.filter(d => d.id !== payload.id))
+
+  if (payload.type === 'logo')
+    return setLogos
+      .modify(l =>
+        l.filter(d => d.id !== payload.id))
+
+  return (state: IAppState) => state
+}
+
 function reducer(state: IAppState, action: Actions) {
   switch (action.type) {
     case SET_BACKGROUND:
-      return {
-        ...state,
-        elements: {
-          ...state.elements,
-          selectedBackground: action.payload
-        }
-      }
+      return setBackground.set(action.payload)(state)
 
     case ADD_TEXT:
-      return {
-        ...state,
-        elements: {
-          ...state.elements,
-          texts: [...state.elements.texts, action.payload]
-        }
-      }
+      return setTexts
+        .modify(t =>
+          [...t, appendIdToElement(action.payload)])(state)
 
     case ADD_LOGO:
-      return {
-        ...state,
-        elements: {
-          ...state.elements,
-          logos: [...state.elements.logos, action.payload]
-        }
+      return setLogos
+        .modify(l =>
+          [...l, appendIdToElement(action.payload)])(state)
+
+    case DELETE_ELEMENT:
+      {
+        const a = deleteItem(action.payload)
+        console.log('@@', a, a(state))
+        debugger
+
+        return deleteItem(action.payload)(state)
       }
 
     default:
@@ -64,7 +79,7 @@ export function App() {
     <DragDropContextProvider backend={HTML5Backend}>
       <Layout>
         <Layout.Header>
-          <h1 style={{ color: '#FFFFFF' }}>Interview challange for promo.com</h1>
+          <h1 style={{ color: '#FFFFFF' }}>Simple editor</h1>
         </Layout.Header>
         <EditorContext.Provider value={{ state, dispatch }}>
           <Layout.Content

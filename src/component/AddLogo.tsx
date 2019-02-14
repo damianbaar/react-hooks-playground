@@ -4,13 +4,14 @@ import { DragSourceMonitor, DragSource, DragSourceConnector } from 'react-dnd'
 
 import { logos } from './Logos'
 import { IDraggableItem, LOGO } from './DraggableItemType'
-import { IEditorContext, EditorContext, mkAddLogoAction } from '../Actions'
+import { IEditorContext, EditorContext, mkAddLogoAction, IPayload } from '../Actions'
 
-export interface IAddLogoPayload {
+export interface IAddLogoPayload extends IPayload {
+  type: 'logo'
   item: string
 }
 
-type IDraggableLogo = IAddLogoPayload & IEditorContext
+type IDraggableLogo = Partial<IAddLogoPayload> & IEditorContext
 
 const draggingSource = {
   beginDrag(props: IDraggableLogo) {

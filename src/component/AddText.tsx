@@ -5,7 +5,7 @@ import { presetPalettes } from 'ant-design-palettes'
 import TextArea from 'antd/lib/input/TextArea'
 import compose from 'ramda/es/compose'
 
-import { EditorContext, mkAddTextAction } from '../Actions'
+import { IPayload, EditorContext, mkAddTextAction } from '../Actions'
 import styles from './AddText.module.css'
 
 const fonts = [
@@ -18,7 +18,8 @@ const colors = Object
   .values(presetPalettes)
   .map(d => d[0])
 
-export interface IAddTextPayload {
+export interface IAddTextPayload extends IPayload {
+  type: 'text'
   text: string
   textStyles: {
     font: string
