@@ -58,13 +58,7 @@ function reducer(state: IAppState, action: Actions) {
           [...l, appendIdToElement(action.payload)])(state)
 
     case DELETE_ELEMENT:
-      {
-        const a = deleteItem(action.payload)
-        console.log('@@', a, a(state))
-        debugger
-
-        return deleteItem(action.payload)(state)
-      }
+      return deleteItem(action.payload)(state)
 
     default:
       throw new Error()
