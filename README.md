@@ -2,6 +2,10 @@
 
 Based on `create-react-app` with `typescript` enabled and fresh `react-hooks`.
 
+#### How it looks like
+* [Static page](https://damianbaar.github.io/react-hooks-playground/)
+* [Demo movie]()
+
 #### What is inside
 * `react-hooks` usage
 * `react-dnd` for drag and drop functionality
